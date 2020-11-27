@@ -73,7 +73,19 @@ func (app *App) createBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) updateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
+	var book Book
+	_ = json.NewDecoder(r.Body).Decode(&book)
+
+	params := mux.Vars(r)
+	_, err := app.Database.Exec("update book set Name = ?, ID = ? where id = ?", book.Name, book.ID, params["id"])
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	json.NewEncoder(w).Encode(book)
 }
 
 func (app *App) deleteBook(w http.ResponseWriter, r *http.Request) {

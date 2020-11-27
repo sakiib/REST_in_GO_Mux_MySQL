@@ -77,7 +77,36 @@ func (app *App) updateBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) deleteBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
+	params := mux.Vars(r)
+	_, err := app.Database.Exec("delete from book where id = ?", params["id"])
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rows, err := app.Database.Query("select * from Book")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	var books []Book
+	b := &Book{}
+	for rows.Next() {
+		err := rows.Scan(&b.Name, &b.ID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		books = append(books, Book{Name: b.Name, ID: b.ID})
+	}
+
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	json.NewEncoder(w).Encode(books)
 }
 
 // HandleRequests ...

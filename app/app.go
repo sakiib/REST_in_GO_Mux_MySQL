@@ -23,20 +23,22 @@ func (app *App) getBooks(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-
+	var books []Book
 	b := &Book{}
 	for rows.Next() {
 		err := rows.Scan(&b.Name, &b.ID)
 		if err != nil {
 			log.Fatal(err)
 		}
-		json.NewEncoder(w).Encode(b)
+		books = append(books, Book{Name: b.Name, ID: b.ID})
 	}
 
 	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	json.NewEncoder(w).Encode(books)
 }
 
 // HandleRequests ...

@@ -46,28 +46,16 @@ func (app *App) getBook(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 
-	// suppose we could have more than one book with this ID
-	rows, err := app.Database.Query("select * from Book where id = ?", params["id"])
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	var books []Book
-	b := &Book{}
-	for rows.Next() {
-		err := rows.Scan(&b.Name, &b.ID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		books = append(books, Book{Name: b.Name, ID: b.ID})
-	}
+	book := &Book{}
+	row := app.Database.QueryRow("select * from Book where id = ?", params["id"])
+	err := row.Scan(&book.Name, &book.ID)
 
-	err = rows.Err()
+	err = row.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	json.NewEncoder(w).Encode(books)
+	json.NewEncoder(w).Encode(book)
 }
 
 func (app *App) createBook(w http.ResponseWriter, r *http.Request) {

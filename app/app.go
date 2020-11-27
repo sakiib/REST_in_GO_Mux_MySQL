@@ -59,7 +59,17 @@ func (app *App) getBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) createBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
+	var book Book
+	_ = json.NewDecoder(r.Body).Decode(&book)
+	_, err := app.Database.Exec("insert into book (Name, ID) values (?, ?)", book.Name, book.ID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	json.NewEncoder(w).Encode(book)
 }
 
 func (app *App) updateBook(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +84,7 @@ func (app *App) deleteBook(w http.ResponseWriter, r *http.Request) {
 func (app *App) HandleRequests() {
 	app.Router.HandleFunc("/api/books", app.getBooks).Methods("GET")
 	app.Router.HandleFunc("/api/books/{id}", app.getBook).Methods("GET")
-	app.Router.HandleFunc("/api/books/", app.createBook).Methods("POST")
+	app.Router.HandleFunc("/api/books", app.createBook).Methods("POST")
 	app.Router.HandleFunc("/api/books/{id}", app.updateBook).Methods("PUT")
 	app.Router.HandleFunc("/api/books/{id}", app.deleteBook).Methods("DELETE")
 }

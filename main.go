@@ -14,8 +14,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello World!")
-
 	database, err := db.CreateDatabase()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -34,5 +32,6 @@ func main() {
 	}
 
 	app.HandleRequests()
+	fmt.Println("server running at port :" + PORT)
 	log.Fatal(http.ListenAndServe(":"+PORT, app.Router))
 }
